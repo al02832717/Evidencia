@@ -1,0 +1,18 @@
+package Usuarios;
+
+public class Doctor extends Usuario {
+
+    //Clase hija, hereda los atributos de nombre e id, y aqui se agrega la especialidad
+    private String especialidad;
+
+
+    public String getEspecialidad() {
+        return especialidad;
+    }
+
+
+    public void setEspecialidad(String especialidad) {
+        this.especialidad = especialidad;
+    }
+
+}
