@@ -1,0 +1,665 @@
+package Administracion;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import Citas.Cita;
+import Usuarios.Doctor;
+import Usuarios.Paciente;
+
+
+public class Main {
+
+
+
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner(System.in);
+        String line = "";
+        try {
+            //Se utiliza lector de archivos para no perder la ifomracion, en este caso para el login del usuario administrador
+            //Se especifica la ruta del archivo
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\administracion.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            //Se guarda en la variable line el contenido del txt
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        boolean loginB = true;
+        do{
+            //Se obtienen los datos del archivo para validar el login
+            System.out.println("Bienvenido al hospital San Miguel");
+
+            if(loginB==false) {
+                //Si los datos estàn incorrectos despues del primer intento mandarà el mensaje de abajo
+                System.out.println("Error en el los datos, por favor verificalos");
+            }//Escanero de datos de acceso
+            System.out.println("\t\t Log In");
+            System.out.print("\t\tUsuario: ");String usuario = entrada.nextLine();
+            System.out.print("\t\tPassword: ");String password = entrada.nextLine();
+
+            //en el archivo se tiene guardado usaurio;contraseña spliteado con ";"
+            String login [] = line.split(";");
+
+            //Por eso en esta posicion se guarda el usuario
+            String userObtenido = login[0];
+            //Por eso en esta posicion se guarda el password
+            String passwordObtenido = login[1];
+
+            if(userObtenido.equals(usuario) && passwordObtenido.equals(password)) {
+                loginB = true;//Se validan datos correctos con el booleano
+            }else {
+                loginB = false;
+            }//Se rompe siclo do while cuando es correcto el login
+        }while(loginB!=true);
+
+        int opcion = 0;
+        do {
+            System.out.println("\n\n\t\tMenu ");
+
+            System.out.println("\t\t1.-Cambiar password");
+            System.out.println("\t\t2.-Administración Doctores");
+            System.out.println("\t\t3.-Administración Pacientes");
+            System.out.println("\t\t4.-Citas");
+            System.out.println("\t\t5.-Salir");
+
+            System.out.print("\t\t Selecciona opción: "); opcion = entrada.nextInt();
+
+            switch(opcion) {
+
+                case 1:
+                    entrada.nextLine();
+                    System.out.print("Ingresa tu contraseña actual: ");
+                    String passwordActual = entrada.nextLine();
+
+                    System.out.print("Ingresa tu NUEVA contraseña: ");
+                    String nuevoPassword = entrada.nextLine();
+
+                    if(passwordActual.equals(getPasswordSaved())) {
+                        //SE valida como seguridd que el usuario sepa su contraseña para poder cambiarla si no, el programa no lo dejarà
+                        saveNewPassword(getUserSaved()+";"+nuevoPassword);
+
+                    }else {
+                        System.out.println("\t\tPor favor comprueba tu identidad, tu contraseña actual no corresponde a la ingresada.");
+                    }
+                    break;
+
+                case 2:
+                    int opc = 0;
+                    do {
+                        System.out.println("1.-Dar de alta doctor");
+                        System.out.println("2.-Ver lista de doctores");
+                        System.out.println("3.-Salir");
+
+                        System.out.print("Ingresa opción: ");
+                        opc = entrada.nextInt();
+
+                        switch(opc) {
+                            case 1:
+                                entrada.nextLine();
+                                System.out.print("Ingresa nombre del doctor: ");
+                                String nombreDrAux = entrada.nextLine();
+                                System.out.print("Ingresa especialidad: ");
+                                String especialidadAux = entrada.nextLine();
+                                //SE guardan los nombres y especialidades de los doctores en otro archivo de txt para no perder ifnormacion
+                                String getStringListDres = getStringDoctores();
+                                if(getStringListDres == null || "".equals(getStringListDres) || getStringListDres.equals(null)) {
+                                    //Se splitea id;nombredoctor;especialidad@
+                                    //los arroba separan cada registro
+                                    //los ; cada informacion del registro
+                                    getStringListDres = "1;"+nombreDrAux+";"+especialidadAux+"@";
+                                    saveDoctor(getStringListDres);
+                                }else {
+
+                                    List<Doctor> listAuxT = getDoctores();
+                                    getStringListDres = getStringListDres+(listAuxT.size()+1)+";"+nombreDrAux+";"+especialidadAux+"@";
+                                    saveDoctor(getStringListDres);
+                                }
+
+                                break;
+
+                            case 2:
+                                List<Doctor> listaDrs = new ArrayList<Doctor>();
+                                String stringlistaDres = getStringDoctores();
+                                //Se valida si no se tiene registro de doctores
+                                if(stringlistaDres == null || "".equals(stringlistaDres) || stringlistaDres.equals(null)) {
+                                    System.out.println("NO hay doctores registrados");
+                                }
+                                else {
+                                    //si se tiene registro se muestran
+                                    listaDrs = getDoctores();
+                                    for(int i=0; i< listaDrs.size(); i++) {
+                                        System.out.println("ID doctor: "+listaDrs.get(i).getIdentificador()+ " Nombre: "+listaDrs.get(i).getNombre()+" Especialidad: "+listaDrs.get(i).getEspecialidad());
+                                    }
+                                }
+                                break;
+
+                            default:System.out.println("opción no válida");
+                        }
+                    }while(opc!=3);
+
+                    break;
+
+                case 3:
+                    int opci = 0;
+                    do {
+                        System.out.println("1.-Dar de alta Paciente");
+                        System.out.println("2.-Ver lista de Pacientes");
+                        System.out.println("3.-Salir");
+
+                        System.out.print("Ingresa opción: ");
+                        opci = entrada.nextInt();
+
+                        switch(opci) {
+                            case 1:
+                                entrada.nextLine();
+                                System.out.print("Ingresa nombre del paciente: ");
+                                String nombrePacienteAux = entrada.nextLine();
+
+                                String getStringListPacientes = getStringPacientes();
+                                if(getStringListPacientes == null || "".equals(getStringListPacientes) || getStringListPacientes.equals(null)) {
+                                    //lo mismo se hace con pacientes, se guarda en u archivo pero el split es mas sencillo porque pide menos campos
+                                    //se valida si seraà el primer registro
+                                    getStringListPacientes = "1;"+nombrePacienteAux+"@";
+                                    savePaciente(getStringListPacientes);
+                                }else {
+                                    //o si ya existen rgistros y se acomodaràn
+                                    List<Paciente> listAuxT = getPacientes();
+                                    getStringListPacientes = getStringListPacientes+(listAuxT.size()+1)+";"+nombrePacienteAux+"@";
+                                    saveDoctor(getStringListPacientes);
+                                }
+
+                                break;
+
+                            case 2:
+                                List<Paciente> lsitaPac = new ArrayList<Paciente>();
+                                String stringPacientes = getStringPacientes();
+                                //Valida que no haya pacientes
+                                if(stringPacientes == null || "".equals(stringPacientes) || stringPacientes.equals(null)) {
+                                    System.out.println("NO hay pacientes registrados");
+                                }
+                                else {
+                                    //si no, si los muestra
+                                    lsitaPac = getPacientes();
+                                    for(int i=0; i< lsitaPac.size(); i++) {
+                                        System.out.println("ID Paciente: "+lsitaPac.get(i).getIdentificador()+ " Nombre: "+lsitaPac.get(i).getNombre());
+                                    }
+                                }
+                                break;
+
+                            default:System.out.println("opción no válida");
+                        }
+                    }while(opci!=3);
+
+                    break;
+
+
+
+
+
+
+
+                case 4:
+                    int option = 0;
+                    do {
+                        System.out.println("1.-Agendar Cita");
+                        System.out.println("2.-Ver Citas");
+                        System.out.println("3.-Salir");
+
+                        System.out.print("Ingresa opción: ");
+                        option = entrada.nextInt();
+
+                        switch(option) {
+
+
+                            case 1:
+                                //Se agendan citas en un archivo txt con e siguiente orden IDdoctor;idPaciente;fecha@
+                                String doctoresDisponibles = getStringDoctores();
+                                String pacientesRegistrados = getStringPacientes();
+                                if(doctoresDisponibles == null || "".equals(doctoresDisponibles) || doctoresDisponibles.equals(null)) {
+                                    System.out.println("No se puede agendar cita debido a que no hay doctores registrados");
+                                }else if(pacientesRegistrados == null || "".equals(pacientesRegistrados) || pacientesRegistrados.equals(null)) {
+                                    System.out.println("No se puede agendar cita debido a que no hay pacientes registrados");
+                                }else {
+                                    List<Doctor> listaDeDoctores = getDoctores();
+                                    List<Paciente> listaDePacientes = getPacientes();
+                                    //Se muestran doctores y pacientes disponibles, tambien se valida si alguno de los dos no tiene registro (pacientes o doctores)
+                                    System.out.println("------Doctores------");
+                                    for(int i=0; i<listaDeDoctores.size(); i++) {
+                                        System.out.println("ID de doctor: "+listaDeDoctores.get(i).getIdentificador()+"  Nombre: "+listaDeDoctores.get(i).getNombre()+"  Especialidad: "+ listaDeDoctores.get(i).getEspecialidad());
+                                    }
+                                    System.out.println("------Pacientes------");
+                                    for(int i=0; i<listaDePacientes.size(); i++) {
+                                        System.out.println("ID Paciente: "+listaDePacientes.get(i).getIdentificador()+" Nombre: "+listaDePacientes.get(i).getNombre());
+                                    }
+                                    System.out.println("Agendar Cita");
+                                    entrada.nextLine();
+                                    System.out.print("Seleccione Id de del DR: ");
+                                    String idDr = entrada.nextLine();
+                                    System.out.print("Seleccione Id del Paciente: ");
+                                    String idPaciente = entrada.nextLine();
+                                    System.out.println("Ingresa la fecha");
+                                    String fechaCita = entrada.nextLine();
+
+                                    String citasString = getStringCitas();
+                                    if(citasString == null || "".equals(citasString) || citasString.equals(null)) {
+                                        citasString = "";
+                                        citasString = idDr+";"+idPaciente+";"+fechaCita+"@";
+                                        saveCita(citasString);
+                                    }else {
+                                        citasString = citasString+idDr+";"+idPaciente+";"+fechaCita+"@";
+                                        saveCita(citasString);
+                                    }
+
+
+                                }
+                                break;
+
+
+                            case 2:
+                                String citasString = getStringCitas();
+                                if(citasString == null || "".equals(citasString) || citasString.equals(null)) {
+                                    System.out.println("No hay citas agendadas");
+                                }else {
+                                    List <Cita> listaDeCitas = getCitasList();
+
+                                    System.out.println("----------Citas Agendadas---------");
+                                    //muestra las citas con sòlo los id de doctores y paciente sya que se implementaron metodos que buscan nombre de doctor o paciente por su id
+                                    for(int i=0; i<listaDeCitas.size(); i++){
+                                        System.out.println("Doctor: " +getNombreDoctorById(listaDeCitas.get(i).getIdDoctor()) + " Especialidad: "+getEspecialidadDoctorById(listaDeCitas.get(i).getIdDoctor())
+                                                +" Paciente: "+getNombrePacienteById(listaDeCitas.get(i).getIdPaciente())+ " Fecha: "+listaDeCitas.get(i).getFechaHoraCita());
+                                    }
+
+
+                                }
+
+
+
+                                break;
+
+
+                        }
+                    }while(option!=3);
+
+
+                    break;
+
+
+
+
+
+
+
+
+                default:System.out.println("Opción no válida");
+
+
+            }
+
+
+        }while(opcion!=5);
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+    public static String getUserSaved() {
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\administracion.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String login [] = line.split(";");
+
+        String userObtenido = login[0];
+
+        return userObtenido;
+    }
+
+    public static String getPasswordSaved() {
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\administracion.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String login [] = line.split(";");
+
+        String passwordObtenido = login[1];
+
+        return passwordObtenido;
+    }
+
+
+    //guarda password cuando se cambia
+    public static void saveNewPassword(String pass) {
+        FileWriter writer;
+        try {
+            writer = new FileWriter("C:\\Users\\Zona52s3\\Desktop\\administracion.txt");
+            writer.write(pass);
+            writer.close();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        getPasswordSaved();
+        getUserSaved();
+    }
+
+
+    //obtiene lista d doctores
+    public static List<Doctor> getDoctores() {
+        List<Doctor> doctoresList = new ArrayList<Doctor>();
+        Doctor dr;
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\doctores.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String dres [] = line.split("@");
+
+        for(int i=0; i< dres.length; i++) {
+            String dresAux [] = dres[i].split(";");
+            dr = new Doctor();
+            dr.setIdentificador(Integer.valueOf(dresAux[0]));
+            dr.setNombre(dresAux[1]);
+            dr.setEspecialidad(dresAux[2]);
+            doctoresList.add(dr);
+        }
+
+        return doctoresList;
+    }
+
+    //obtiene lista de pacientes
+    public static List<Paciente> getPacientes() {
+        List<Paciente> pacientesList = new ArrayList<Paciente>();
+        Paciente pa;
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\pacientes.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String pacientesA [] = line.split("@");
+
+        for(int i=0; i< pacientesA.length; i++) {
+            String dresAux [] = pacientesA[i].split(";");
+            pa = new Paciente();
+            pa.setIdentificador(Integer.valueOf(dresAux[0]));
+            pa.setNombre(dresAux[1]);
+            pacientesList.add(pa);
+        }
+
+        return pacientesList;
+    }
+
+    //obtiene lista de citas
+    public static List<Cita> getCitasList() {
+        List<Cita> citasList = new ArrayList<Cita>();
+        Cita cit;
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\citas.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String pacientesA [] = line.split("@");
+
+        for(int i=0; i< pacientesA.length; i++) {
+            String dresAux [] = pacientesA[i].split(";");
+            cit = new Cita();
+            cit.setIdDoctor(dresAux[0]);;
+            cit.setIdPaciente(dresAux[1]);
+            cit.setFechaHoraCita(dresAux[2]);
+            citasList.add(cit);
+        }
+
+        return citasList;
+    }
+    //metodo para validar si hay registro de doctores
+    public static String getStringDoctores() {
+
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\doctores.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return line;
+
+    }
+
+    //metodo para validar si hay registro de pacientes
+    public static String getStringPacientes() {
+
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\pacientes.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return line;
+
+    }
+    //metodo para validar si hay registro de citas
+    public static String getStringCitas() {
+
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\citas.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return line;
+
+    }
+
+    public static void saveDoctor(String infoDoctor) {
+        FileWriter writer;
+        try {
+            writer = new FileWriter("C:\\Users\\Zona52s3\\Desktop\\doctores.txt");
+            writer.write(infoDoctor);
+            writer.close();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public static void savePaciente(String infoPaciente) {
+        FileWriter writer;
+        try {
+            writer = new FileWriter("C:\\Users\\Zona52s3\\Desktop\\pacientes.txt");
+            writer.write(infoPaciente);
+            writer.close();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void saveCita(String infoCitas) {
+        FileWriter writer;
+        try {
+            writer = new FileWriter("C:\\Users\\Zona52s3\\Desktop\\citas.txt");
+            writer.write(infoCitas);
+            writer.close();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    //obtiene el nombre del doctor mediante su id
+    public static String getNombreDoctorById(String idDoctor) {
+        List<Doctor> doctoresList = new ArrayList<Doctor>();
+        Doctor dr;
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\doctores.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String dres [] = line.split("@");
+
+        for(int i=0; i< dres.length; i++) {
+            String dresAux [] = dres[i].split(";");
+            dr = new Doctor();
+            dr.setIdentificador(Integer.valueOf(dresAux[0]));
+            dr.setNombre(dresAux[1]);
+            dr.setEspecialidad(dresAux[2]);
+            doctoresList.add(dr);
+        }
+        String nombreMatch = "";
+
+        for(int i=0; i< doctoresList.size(); i++) {
+            String idDelDr = String.valueOf(doctoresList.get(i).getIdentificador());
+            if(idDelDr.equals(idDoctor)) {
+                nombreMatch = doctoresList.get(i).getNombre();
+            }
+        }
+
+        return nombreMatch;
+    }
+
+    //obtiene el nombre del doctor paciente su id
+    public static String getNombrePacienteById(String idPacient) {
+        List<Paciente> pacienteList = new ArrayList<Paciente>();
+        Paciente pac;
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\pacientes.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String dres [] = line.split("@");
+
+        for(int i=0; i< dres.length; i++) {
+            String dresAux [] = dres[i].split(";");
+            pac = new Paciente();
+            pac.setIdentificador(Integer.valueOf(dresAux[0]));
+            pac.setNombre(dresAux[1]);
+            pacienteList.add(pac);
+        }
+        String nombreMatch = "";
+
+        for(int i=0; i< pacienteList.size(); i++) {
+            String idPaciente = String.valueOf(pacienteList.get(i).getIdentificador());
+            if(idPaciente.equals(idPacient)) {
+                nombreMatch = pacienteList.get(i).getNombre();
+            }
+        }
+
+        return nombreMatch;
+    }
+    //obtiene el nombre de la espcialidad del doctor mediante su id
+    public static String getEspecialidadDoctorById(String idDoctor) {
+        List<Doctor> doctoresList = new ArrayList<Doctor>();
+        Doctor dr;
+        String line = "";
+        try {
+            FileReader fr = new FileReader("C:\\Users\\Zona52s3\\Desktop\\doctores.txt");
+            BufferedReader reader = new BufferedReader(fr);
+            line =reader.readLine();
+
+        }catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String dres [] = line.split("@");
+
+        for(int i=0; i< dres.length; i++) {
+            String dresAux [] = dres[i].split(";");
+            dr = new Doctor();
+            dr.setIdentificador(Integer.valueOf(dresAux[0]));
+            dr.setNombre(dresAux[1]);
+            dr.setEspecialidad(dresAux[2]);
+            doctoresList.add(dr);
+        }
+        String especialidadMatch = "";
+
+        for(int i=0; i< doctoresList.size(); i++) {
+            String idDelDr = String.valueOf(doctoresList.get(i).getIdentificador());
+            if(idDelDr.equals(idDoctor)) {
+                especialidadMatch = doctoresList.get(i).getEspecialidad();
+            }
+        }
+
+        return especialidadMatch;
+    }
+
+}
