@@ -1,0 +1,44 @@
+package Citas;
+
+public class Cita {
+
+    //Clase cita con datos de doctor, paciente,etc
+    private int identificadorCita;
+    private String fechaHoraCita;
+    private String motivos;
+    private String idDoctor;
+    private String idPaciente;
+
+    public int getIdentificadorCita() {
+        return identificadorCita;
+    }
+    public void setIdentificadorCita(int identificadorCita) {
+        this.identificadorCita = identificadorCita;
+    }
+    public String getFechaHoraCita() {
+        return fechaHoraCita;
+    }
+    public void setFechaHoraCita(String fechaHoraCita) {
+        this.fechaHoraCita = fechaHoraCita;
+    }
+    public String getMotivos() {
+        return motivos;
+    }
+    public void setMotivos(String motivos) {
+        this.motivos = motivos;
+    }
+    public String getIdDoctor() {
+        return idDoctor;
+    }
+    public void setIdDoctor(String idDoctor) {
+        this.idDoctor = idDoctor;
+    }
+    public String getIdPaciente() {
+        return idPaciente;
+    }
+    public void setIdPaciente(String idPaciente) {
+        this.idPaciente = idPaciente;
+    }
+
+
+}
